@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Random place generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+    <script>
+        const pointRegex = new RegExp('^(\-?[0-9]+(\.[0-9])?),\ *(\-?[0-9]+(\.[0-9])?)$')
+        const parsePoint = (target) => {
+            const match = pointRegex.exec(target)
+
+            if (match === null) {
+                throw Error('invalid input')
+            }
+
+            const longitude = match[1]
+            const latitude = match[3]
+
+            return {
+                longitude: parseFloat(longitude),
+                latitude: parseFloat(latitude),
+            }
+        }
+        window.onload = () => {
+            const defaultPoint1Str = localStorage.getItem('point1')
+
+            if (defaultPoint1Str !== null) {
+                const point1Input = document.getElementById('point1Input')
+                point1Input.value = defaultPoint1Str
+            }
+
+            const defaultPoint2Str = localStorage.getItem('point2')
+
+            if (defaultPoint2Str !== null) {
+                const point2Input = document.getElementById('point2Input')
+                point2Input.value = defaultPoint2Str
+            }
+
+            const submit = document.getElementById('points')
+            submit.addEventListener('submit', (event) => {
+                event.preventDefault()
+                const point1Str = event.currentTarget.point1.value
+                const point2Str = event.currentTarget.point2.value
+
+                let point1
+                let point2
+                try {
+                    point1 = parsePoint(point1Str)
+                } catch(e) {
+                    alert('Point1 is invalid value.\n Please Input below format.\n "90.000..., 180.000..."')
+                    throw e
+                }
+
+                try {
+                    point2 = parsePoint(point2Str)
+                } catch(e) {
+                    alert('Point2 is invalid value.\n Please Input below format.\n "90.000..., 180.000..."')
+                    throw e
+                }
+
+                localStorage.setItem('point1', point1Str)
+                localStorage.setItem('point2', point2Str)
+
+                const maxLongitude = Math.max(point1.longitude, point2.longitude)
+                const minLongitude = Math.min(point1.longitude, point2.longitude)
+                const maxLatitude  = Math.max(point1.latitude, point2.latitude)
+                const minLatitude  = Math.min(point1.latitude, point2.latitude)
+
+                const randomLongitude = Math.random() * (maxLongitude - minLongitude) + minLongitude
+                const randomLatitude = Math.random() * (maxLatitude - minLatitude) + minLatitude
+
+                const resultsTable = document.getElementById('results')
+                const newRow = resultsTable.insertRow(-1)
+                const longitude = newRow.insertCell(0)
+                const latitude = newRow.insertCell(1)
+                const jumpButton = newRow.insertCell(2)
+
+                longitude.appendChild(
+                    document.createTextNode(randomLongitude)
+                )
+
+                latitude.appendChild(
+                    document.createTextNode(randomLatitude)
+                )
+
+                jumpButtonNode = document.createElement('button')
+                jumpButtonNode.addEventListener('click', (event)=> {
+                    window.open('http://www.google.com/maps/place/' + randomLongitude.toString() + ',' + randomLatitude.toString())
+                })
+
+                jumpButtonNode.appendChild(
+                    document.createTextNode('Open in Google map')
+                )
+
+                jumpButton.appendChild(jumpButtonNode)
+                return false
+            })
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center">Random place generator</h1>
+    </div>
+    <div class="container">
+        <h6>About</h6>
+        <p>Generate random place coordinate that lied inside a rectangle.</p>
+        <p>And you can see that point on Goolge map</p>
+    </div>
+    <div class="container">
+        <form id='points'>
+            <div class="row">
+                <div class="six columns">
+                    <label for='point1Input'> Point1</label>
+                    <input class="u-full-width" type='text' name='point1' placeholder="90.000..., 180.000..." id='point1Input'/>
+                </div>
+                <div class="six columns">
+                    <label for='point2Input'>Point2</label>
+                    <input class="u-full-width" type='text' name='point2'placeholder="90.000..., 180.000..." id='point2Input'/>
+                </div>
+            </div>
+            <input type="submit" value="choice" class="button-primary">
+        </form>
+    </div>
+    <div class="container">
+        <table id='results' class="u-full-width">
+            <tr class="u-full-width">
+                <th>
+                    Longitude
+                </th>
+                <th>
+                    Latitude
+                </th>
+                <th>
+                    Google map link
+                </th>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
